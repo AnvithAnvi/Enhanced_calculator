@@ -9,3 +9,12 @@ def validate_number(value):
     if abs(value) > CalculatorConfig.MAX_INPUT_VALUE:
         raise ValidationError(f"Value exceeds {CalculatorConfig.MAX_INPUT_VALUE}.")
     return value
+
+def validate_numbers(a, b):
+    """Validate that both inputs can be safely converted to floats."""
+    try:
+        a = float(a)
+        b = float(b)
+        return a, b
+    except ValueError:
+        raise ValueError("Inputs must be numeric values.")

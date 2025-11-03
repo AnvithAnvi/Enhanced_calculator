@@ -1,27 +1,48 @@
 import pandas as pd
+import os
+
 
 class History:
+    """Handles storing and managing calculation history."""
     def __init__(self):
         self._history = []
+        self.history_df = pd.DataFrame(
+            columns=["operand1", "operand2", "operation", "result"]
+        )
 
-    def add(self, calc):
-        self._history.append(calc)
+    def add(self, calculation):
+        """Add a new calculation to history."""
+        self._history.append(calculation)
+        new_row = {
+            "operand1": calculation.operand1,
+            "operand2": calculation.operand2,
+            "operation": calculation.operation,
+            "result": calculation.result,
+        }
+        self.history_df = pd.concat(
+            [self.history_df, pd.DataFrame([new_row])], ignore_index=True
+        )
 
     def clear(self):
-        self._history.clear()
+        """Clear the entire history."""
+        self._history = []
+        self.history_df = pd.DataFrame(
+            columns=["operand1", "operand2", "operation", "result"]
+        )
 
-    def to_dataframe(self):
-        return pd.DataFrame([{
-            "operand1": c.operand1,
-            "operation": c.operation,
-            "operand2": c.operand2,
-            "result": c.result,
-            "timestamp": c.timestamp
-        } for c in self._history])
-
-    def load_from_csv(self, path):
+    def load_from_csv(self, file_path):
+        """Load history data from a CSV file."""
         try:
-            df = pd.read_csv(path)
-            self._history = df.to_dict("records")
+            if not os.path.exists(file_path):
+                raise FileNotFoundError
+            self.history_df = pd.read_csv(file_path)
+            self._history = self.history_df.to_dict("records")
+            print("History loaded successfully.")
         except FileNotFoundError:
             print("No history file found.")
+        except Exception as e:
+            print(f"Error loading file: {e}")
+
+    def to_dataframe(self):
+        """Return the history dataframe."""
+        return self.history_df
